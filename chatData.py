@@ -1,6 +1,8 @@
 import re, sys
 import pandas as pd
 
+import matplotlib.pyplot as plt
+
 if len(sys.argv) < 2:
     print("Uso: python script.py nombre_del_archivo.txt")
     sys.exit(1)
@@ -11,6 +13,9 @@ with open(nombre_archivo, "r", encoding="utf-8") as archivo:
     archivo = archivo.readlines()
 mensajes = []
 
+
+## Patro de Expresion Regular
+## Captura 
 patron = r'\[(\d{1,2}/\d{1,2}/\d{2,4}), ([^\]]+)\] ([^:]+): (.*)'
 
 for linea in archivo:
@@ -58,13 +63,54 @@ dfNombres = df["nombre"].unique()
 
 # Ver nombres y mensajes
 countName = getCountName(dfNombres)
-print(countName)
+#print(countName)
 
 # Ver cantidad de msj en total
-print(df["nombre"].shape)
+#print(df["nombre"].shape[0])
 
 # Ver quien mando mas y la diferencia
 diff = getDifferenceCount(countName)
-print(diff)
+#print(diff)
 
-        
+
+## Chats por Dia
+#print(df["fecha"].head())
+df["fecha"] = pd.to_datetime(df["fecha"], format="%d/%m/%y", errors='coerce')
+mensajes_por_dia = df["fecha"].value_counts().sort_index()
+
+dia_max_mensajes = mensajes_por_dia.idxmax()
+cantidad_max = mensajes_por_dia.max()
+
+
+
+#print(f"El día con más mensajes fue {dia_max_mensajes.date()} con {cantidad_max} mensajes.")
+text_to_save = df[df["fecha"] == dia_max_mensajes]
+
+
+# Codigo Para guardar texto de dia con mas mensajes en un archivo
+
+"""
+Crear contenido a guardar
+contenido = "\nPrimeros 50 mensajes de ese día:\n\n"
+for index, row in text_to_save.iterrows():
+    contenido += f"[{row['fecha'].date()} {row['hora']}] {row['nombre']}: {row['mensaje']}\n"
+
+# Guardar en archivo
+with open("reporte_dia_mas_activo.txt", "w", encoding="utf-8") as archivo_salida:
+    archivo_salida.write(contenido)
+""" 
+
+
+"""
+usuario = df["nombre"].unique()[1]  # Elegís el primer nombre
+mensajes_usuario = df[df["nombre"] == usuario] 
+test = mensajes_usuario["fecha"].value_counts().sort_index().plot(kind='line')
+
+plt.title(f"Actividad diaria de {usuario}")
+plt.xlabel("Fecha")
+plt.ylabel("Cantidad de mensajes")
+plt.grid(True)
+plt.show()
+"""
+
+print(df[df["fecha"] == "2022-07-01"])
